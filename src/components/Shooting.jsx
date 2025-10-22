@@ -123,9 +123,10 @@ export default function Shooting() {
   // 🎯 CAST YOUR SCORE
   const handleCast = async () => {
     try {
-      await sdk.actions.openCastComposer({
-        text: `🎯 Airdrop Hunter'da ${score} puan yaptım! 💥 #FarcasterMiniGame`,
-      });
+     await sdk.actions.openComposer({
+  text: `🎯 Airdrop Hunter'da ${score} puan yaptım! 💥 #FarcasterMiniGame`,
+});
+
     } catch (err) {
       console.error("Cast hatası:", err);
       alert("Cast işlemi başarısız oldu 😅");
