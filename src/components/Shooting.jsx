@@ -1,8 +1,6 @@
 import React, { useEffect, useRef, useState } from "react";
 import { motion } from "framer-motion";
 import { sdk } from "@farcaster/miniapp-sdk";
-import { useAccount, useWriteContract } from "wagmi";
-import { base } from "wagmi/chains";
 import { ethers } from "ethers";
 
 const TOTAL_BOXES = 20;
@@ -31,18 +29,14 @@ export default function Shooting() {
   const [errorMsg, setErrorMsg] = useState("");
   const [txHash, setTxHash] = useState(null);
 
-  const { address, isConnected } = useAccount();
-  const { writeContractAsync } = useWriteContract();
-
   const intervalRef = useRef(null);
   const timeoutRef = useRef(null);
 
-  // ✅ Farcaster SDK ready
   useEffect(() => {
     const init = async () => {
       try {
         await sdk.actions.ready();
-        console.log("✅ Farcaster MiniApp ready!");
+        console.log("✅ Farcaster MiniApp hazır!");
       } catch (err) {
         console.error("SDK ready hatası:", err);
       }
@@ -50,6 +44,7 @@ export default function Shooting() {
     init();
   }, []);
 
+  // 🔄 Oyunu sıfırla
   const resetGame = () => {
     setTargets(
       Array.from({ length: TOTAL_BOXES }, (_, i) => ({
@@ -75,7 +70,7 @@ export default function Shooting() {
     };
   }, []);
 
-  // 🔥 Hedefleri sırayla rastgele yak
+  // 🎯 Hedefleri sırayla aktif et
   useEffect(() => {
     if (!isRunning || gameOver || targets.length === 0) return;
 
@@ -129,12 +124,15 @@ export default function Shooting() {
     clearTimeout(timeoutRef.current);
     setScore((s) => s + 10);
     setActiveIndex(null);
+
     setTargets((prev) =>
-      prev.map((b) => (b.id === id ? { ...b, hit: true, active: false } : b))
+      prev.map((b) =>
+        b.id === id ? { ...b, hit: true, active: false } : b
+      )
     );
   };
 
-  // 🎯 CAST YOUR SCORE
+  // 🎯 CAST işlemi
   const handleCast = async () => {
     const text = `💥 Airdrop Hunter'da ${score} puan yaptım! 🚀\nBenim skorumu geçebilir misin? 🎯`;
     const appUrl = "https://farcaster.xyz/miniapps/QBCgeq4Db7Wx/airdrop-hunter";
@@ -143,54 +141,34 @@ export default function Shooting() {
       const warpcastUrl = `https://warpcast.com/~/compose?text=${encodeURIComponent(
         text
       )}&embeds[]=${encodeURIComponent(appUrl)}`;
-
-      if (sdk?.actions?.openUrl) {
-        await sdk.actions.openUrl({ url: warpcastUrl });
-        console.log("✅ Cast composer açıldı (SDK ile)");
-      } else {
-        window.open(warpcastUrl, "_blank");
-        console.log("🌐 Tarayıcı composer açıldı (fallback)");
-      }
+      await sdk.actions.openUrl({ url: warpcastUrl });
+      console.log("✅ Cast composer açıldı");
     } catch (err) {
       console.error("Cast hatası:", err);
       setErrorMsg("Cast işlemi başarısız oldu 😅");
     }
   };
 
-  // 🪙 Mint
+  // 🪙 Sadece Farcaster Wallet ile mint işlemi
   const handleMint = async () => {
     try {
-      console.log("🪙 Mint işlemi başlatılıyor...");
+      console.log("🪙 Mint işlemi başlatılıyor (Farcaster Wallet)...");
 
-      // 1️⃣ Farcaster MiniApp içindeysek SDK Provider’ı kullan
-      const fcProvider = await sdk.wallet.getEthereumProvider();
-
-      if (fcProvider) {
-        const ethersProvider = new ethers.BrowserProvider(fcProvider);
-        const signer = await ethersProvider.getSigner();
-        const contract = new ethers.Contract(CONTRACT_ADDRESS, ABI, signer);
-        const tx = await contract.mintScore(score);
-        await tx.wait();
-        console.log("✅ Farcaster Wallet mint tamamlandı!");
-        setTxHash(tx.hash);
+      const provider = await sdk.wallet.getEthereumProvider();
+      if (!provider) {
+        setErrorMsg("⚠️ Farcaster Wallet bulunamadı 😕");
         return;
       }
 
-      // 2️⃣ Normal cüzdan (wagmi)
-      if (isConnected) {
-        const tx = await writeContractAsync({
-          address: CONTRACT_ADDRESS,
-          abi: ABI,
-          functionName: "mintScore",
-          args: [score],
-          chainId: base.id,
-        });
-        console.log("✅ Wagmi mint tamamlandı!");
-        setTxHash(tx);
-        return;
-      }
+      const ethersProvider = new ethers.BrowserProvider(provider);
+      const signer = await ethersProvider.getSigner();
+      const contract = new ethers.Contract(CONTRACT_ADDRESS, ABI, signer);
 
-      setErrorMsg("Cüzdan bağlı değil 😕");
+      const tx = await contract.mintScore(score);
+      await tx.wait();
+
+      console.log("✅ Mint başarılı! Tx:", tx.hash);
+      setTxHash(tx.hash);
     } catch (err) {
       console.error("Mint hatası:", err);
       setErrorMsg("Mint işlemi başarısız oldu 😅");
@@ -204,7 +182,7 @@ export default function Shooting() {
         Skor: <span className="text-yellow-400 font-semibold">{score}</span>
       </p>
 
-      <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-3 sm:gap-4 bg-black/40 p-4 sm:p-6 md:p-8 rounded-2xl shadow-2xl border border-white/10 w-full max-w-md mx-auto">
+      <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-3 bg-black/40 p-4 rounded-2xl shadow-2xl border border-white/10 w-full max-w-md mx-auto">
         {targets.map((box) => (
           <motion.div
             key={box.id}
@@ -216,7 +194,7 @@ export default function Shooting() {
                 : box.active
                 ? "#f59e0b"
                 : "#374151",
-              boxShadow: box.active ? "0 0 22px #fbbf24" : "0 0 0 transparent",
+              boxShadow: box.active ? "0 0 22px #fbbf24" : "none",
             }}
             transition={{ duration: 0.2 }}
             className="w-20 h-20 rounded-xl cursor-pointer"
