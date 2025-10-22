@@ -12,149 +12,18 @@ const ACTIVE_LIFETIME_MS = 600;
 // 🎯 Kontrat bilgileri
 const CONTRACT_ADDRESS = "0x1C77C89F3E2691dfDef0BC364678346A3dA0a098";
 
+
 const ABI = [
   {
-    "inputs": [
-      {
-        "internalType": "uint256",
-        "name": "score",
-        "type": "uint256"
-      }
+    inputs: [
+      { internalType: "uint256", name: "score", type: "uint256" },
     ],
-    "name": "mintScore",
-    "outputs": [
-      {
-        "internalType": "uint256",
-        "name": "",
-        "type": "uint256"
-      }
-    ],
-    "stateMutability": "nonpayable",
-    "type": "function"
+    name: "mintScore",
+    outputs: [{ internalType: "uint256", name: "", type: "uint256" }],
+    stateMutability: "nonpayable",
+    type: "function",
   },
-  {
-    "inputs": [],
-    "name": "name",
-    "outputs": [
-      {
-        "internalType": "string",
-        "name": "",
-        "type": "string"
-      }
-    ],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "inputs": [],
-    "name": "symbol",
-    "outputs": [
-      {
-        "internalType": "string",
-        "name": "",
-        "type": "string"
-      }
-    ],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "inputs": [],
-    "name": "totalSupply",
-    "outputs": [
-      {
-        "internalType": "uint256",
-        "name": "",
-        "type": "uint256"
-      }
-    ],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "uint256",
-        "name": "",
-        "type": "uint256"
-      }
-    ],
-    "name": "ownerOf",
-    "outputs": [
-      {
-        "internalType": "address",
-        "name": "",
-        "type": "address"
-      }
-    ],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "address",
-        "name": "",
-        "type": "address"
-      }
-    ],
-    "name": "balanceOf",
-    "outputs": [
-      {
-        "internalType": "uint256",
-        "name": "",
-        "type": "uint256"
-      }
-    ],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "uint256",
-        "name": "",
-        "type": "uint256"
-      }
-    ],
-    "name": "scoreOf",
-    "outputs": [
-      {
-        "internalType": "uint256",
-        "name": "",
-        "type": "uint256"
-      }
-    ],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "anonymous": false,
-    "inputs": [
-      {
-        "indexed": true,
-        "internalType": "address",
-        "name": "to",
-        "type": "address"
-      },
-      {
-        "indexed": true,
-        "internalType": "uint256",
-        "name": "tokenId",
-        "type": "uint256"
-      },
-      {
-        "indexed": false,
-        "internalType": "uint256",
-        "name": "score",
-        "type": "uint256"
-      }
-    ],
-    "name": "Minted",
-    "type": "event"
-  }
 ];
-
 
 export default function Shooting() {
   const [targets, setTargets] = useState([]);
@@ -293,33 +162,39 @@ export default function Shooting() {
   };
 
   // 🪙 MINT işlemi (wagmi ile Base mainnet)
-  const handleMint = async () => {
-    try {
-      if (!isConnected) {
-        setErrorMsg("⚠️ Cüzdan bağlı değil 😕");
-        return;
-      }
-      if (score <= 0) {
-        setErrorMsg("Henüz skorun yok 😅");
-        return;
-      }
-
-      console.log("🪙 Mint işlemi başlatılıyor...");
-      const tx = await writeContractAsync({
-        address: CONTRACT_ADDRESS,
-        abi: ABI,
-        functionName: "mintScore",
-        args: [score],
-        chainId: base.id,
-      });
-
-      console.log("✅ Mint gönderildi:", tx);
-      setTxHash(tx);
-    } catch (err) {
-      console.error("Mint hatası:", err);
-      setErrorMsg("Mint işlemi başarısız oldu 😅");
+ const handleMint = async () => {
+  try {
+    if (!isConnected) {
+      setErrorMsg("⚠️ Cüzdan bağlı değil 😕");
+      return;
     }
-  };
+
+    if (score <= 0) {
+      setErrorMsg("Henüz skorun yok 😅");
+      return;
+    }
+
+    console.log("🪙 Mint işlemi başlatılıyor...");
+
+    const txHash = await writeContractAsync({
+      address: CONTRACT_ADDRESS,
+      abi: ABI,
+      functionName: "mintScore",
+      args: [score],
+      chainId: base.id,
+    });
+
+    console.log("✅ Mint gönderildi:", txHash);
+    setTxHash(txHash);
+
+    // Başarılı işlem sonrası mesaj
+    setErrorMsg("🎉 Mint başarılı! İşlem gönderildi 🚀");
+  } catch (err) {
+    console.error("Mint hatası:", err);
+    setErrorMsg("❌ Mint işlemi başarısız oldu 😅");
+  }
+};
+
 
   return (
     <div className="flex flex-col items-center justify-center min-h-screen px-3 bg-gradient-to-b from-indigo-900 via-purple-900 to-slate-900 text-white">
