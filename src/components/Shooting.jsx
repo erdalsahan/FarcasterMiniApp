@@ -125,10 +125,13 @@ const handleCast = async () => {
   const text = `💥 Airdrop Hunter'da ${score} puan yaptım! 🚀
 Benim skorumu geçebilir misin? 🎯`;
 
-  const appUrl = "https://farcaster-mini-app-kappa.vercel.app/";
+  // ✅ Farcaster miniapp linkini ekliyoruz
+  const appUrl = "https://farcaster.xyz/miniapps/QBCgeq4Db7Wx/airdrop-hunter";
 
   try {
-    const warpcastUrl = `https://warpcast.com/~/compose?text=${encodeURIComponent(text)}&embeds[]=${encodeURIComponent(appUrl)}`;
+    const warpcastUrl = `https://warpcast.com/~/compose?text=${encodeURIComponent(
+      text
+    )}&embeds[]=${encodeURIComponent(appUrl)}`;
 
     if (sdk?.actions?.openUrl) {
       await sdk.actions.openUrl({ url: warpcastUrl });
@@ -142,6 +145,7 @@ Benim skorumu geçebilir misin? 🎯`;
     setErrorMsg("Cast işlemi başarısız oldu 😅");
   }
 };
+
 
 
 
