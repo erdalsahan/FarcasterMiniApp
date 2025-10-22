@@ -122,16 +122,27 @@ export default function Shooting() {
 
   // 🎯 CAST YOUR SCORE
   const handleCast = async () => {
-    try {
-     await sdk.actions.openComposer({
-  text: `🎯 Airdrop Hunter'da ${score} puan yaptım! 💥 #FarcasterMiniGame`,
-});
-
-    } catch (err) {
-      console.error("Cast hatası:", err);
-      alert("Cast işlemi başarısız oldu 😅");
+  console.log("SDK Actions:", sdk.actions);
+  try {
+    if (sdk?.actions?.openUrl) {
+      await sdk.actions.openUrl({
+        url: `https://warpcast.com/~/compose?text=🎯 Airdrop Hunter'da ${score} puan yaptım! 💥 #FarcasterMiniGame`
+      });
+      console.log("✅ Farcaster içinde composer açıldı");
+    } else {
+      // Tarayıcıda test fallback
+      window.open(
+        `https://warpcast.com/~/compose?text=🎯 Airdrop Hunter'da ${score} puan yaptım! 💥 #FarcasterMiniGame`,
+        "_blank"
+      );
+      console.log("🌐 Tarayıcıda composer açıldı");
     }
-  };
+  } catch (err) {
+    console.error("Cast hatası:", err);
+    setErrorMsg("Cast işlemi başarısız oldu 😅");
+  }
+};
+
 
   // 🪙 MINT SCORE
   const handleMint = async () => {
