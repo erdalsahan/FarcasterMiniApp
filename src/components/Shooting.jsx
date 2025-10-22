@@ -121,27 +121,34 @@ export default function Shooting() {
   };
 
   // 🎯 CAST YOUR SCORE
-  const handleCast = async () => {
-  console.log("SDK Actions:", sdk.actions);
+const handleCast = async () => {
+  const text = `💥 Airdrop Hunter'da ${score} puan yaptım! 🚀
+Benim skorumu geçebilir misin? 🎯`;
+
+  const imageUrl = "https://farcaster-mini-app-kappa.vercel.app/Logo.png";
+  const appUrl = "https://farcaster-mini-app-kappa.vercel.app/";
+
   try {
+    // 🔗 Warpcast composer bağlantısı: text + görsel + oyun linki
+    const warpcastUrl = `https://warpcast.com/~/compose?text=${encodeURIComponent(
+      text
+    )}&embeds[]=${encodeURIComponent(imageUrl)}&embeds[]=${encodeURIComponent(appUrl)}`;
+
+    // Farcaster içindeyse SDK ile aç
     if (sdk?.actions?.openUrl) {
-      await sdk.actions.openUrl({
-        url: `https://warpcast.com/~/compose?text=🎯 Airdrop Hunter'da ${score} puan yaptım! 💥 #FarcasterMiniGame`
-      });
-      console.log("✅ Farcaster içinde composer açıldı");
+      await sdk.actions.openUrl({ url: warpcastUrl });
+      console.log("✅ Cast composer açıldı (SDK ile)");
     } else {
-      // Tarayıcıda test fallback
-      window.open(
-        `https://warpcast.com/~/compose?text=🎯 Airdrop Hunter'da ${score} puan yaptım! 💥 #FarcasterMiniGame`,
-        "_blank"
-      );
-      console.log("🌐 Tarayıcıda composer açıldı");
+      // Browser fallback
+      window.open(warpcastUrl, "_blank");
+      console.log("🌐 Tarayıcı composer açıldı (fallback)");
     }
   } catch (err) {
     console.error("Cast hatası:", err);
     setErrorMsg("Cast işlemi başarısız oldu 😅");
   }
 };
+
 
 
   // 🪙 MINT SCORE
