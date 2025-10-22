@@ -3,26 +3,23 @@ import { motion } from "framer-motion";
 import { sdk } from "@farcaster/miniapp-sdk";
 import { useAccount, useWriteContract } from "wagmi";
 import { base } from "wagmi/chains";
+import { ethers } from "ethers";
 
 const TOTAL_BOXES = 20;
 const MAX_HITS = 20;
 const ACTIVATE_EVERY_MS = 700;
 const ACTIVE_LIFETIME_MS = 600;
 
-// 🎯 Kontrat bilgileri
 const CONTRACT_ADDRESS = "0x0DD40377cC1841b3e1aE695B015Cd82883b35390";
 const ABI = [
   {
-    inputs: [
-      { internalType: "uint256", name: "score", type: "uint256" }
-    ],
+    inputs: [{ internalType: "uint256", name: "score", type: "uint256" }],
     name: "mintScore",
     outputs: [{ internalType: "uint256", name: "", type: "uint256" }],
     stateMutability: "nonpayable",
     type: "function",
   },
 ];
-
 
 export default function Shooting() {
   const [targets, setTargets] = useState([]);
@@ -32,9 +29,10 @@ export default function Shooting() {
   const [isRunning, setIsRunning] = useState(true);
   const [gameOver, setGameOver] = useState(false);
   const [errorMsg, setErrorMsg] = useState("");
+  const [txHash, setTxHash] = useState(null);
 
   const { address, isConnected } = useAccount();
-  const { writeContract, data: txHash, isPending, isSuccess } = useWriteContract();
+  const { writeContractAsync } = useWriteContract();
 
   const intervalRef = useRef(null);
   const timeoutRef = useRef(null);
@@ -52,7 +50,6 @@ export default function Shooting() {
     init();
   }, []);
 
-  // 🔄 Oyunu sıfırla
   const resetGame = () => {
     setTargets(
       Array.from({ length: TOTAL_BOXES }, (_, i) => ({
@@ -67,6 +64,7 @@ export default function Shooting() {
     setGameOver(false);
     setIsRunning(true);
     setErrorMsg("");
+    setTxHash(null);
   };
 
   useEffect(() => {
@@ -92,7 +90,6 @@ export default function Shooting() {
           return prev;
         }
 
-        // Yeni hedef seç
         setTargets((prevTargets) => {
           const available = prevTargets.filter((b) => !b.hit);
           if (available.length === 0) return prevTargets;
@@ -127,25 +124,19 @@ export default function Shooting() {
     return () => clearInterval(intervalRef.current);
   }, [isRunning, gameOver, targets.length]);
 
-  // 💥 Vurulma
   const handleHit = (id) => {
     if (id !== activeIndex || gameOver) return;
     clearTimeout(timeoutRef.current);
     setScore((s) => s + 10);
     setActiveIndex(null);
-
     setTargets((prev) =>
-      prev.map((b) =>
-        b.id === id ? { ...b, hit: true, active: false } : b
-      )
+      prev.map((b) => (b.id === id ? { ...b, hit: true, active: false } : b))
     );
   };
 
   // 🎯 CAST YOUR SCORE
   const handleCast = async () => {
-    const text = `💥 Airdrop Hunter'da ${score} puan yaptım! 🚀
-Benim skorumu geçebilir misin? 🎯`;
-
+    const text = `💥 Airdrop Hunter'da ${score} puan yaptım! 🚀\nBenim skorumu geçebilir misin? 🎯`;
     const appUrl = "https://farcaster.xyz/miniapps/QBCgeq4Db7Wx/airdrop-hunter";
 
     try {
@@ -166,45 +157,45 @@ Benim skorumu geçebilir misin? 🎯`;
     }
   };
 
-  // 🪙 MINT SCORE — wagmi üzerinden
-const handleMint = async () => {
-  try {
-    if (!isConnected) {
+  // 🪙 Mint
+  const handleMint = async () => {
+    try {
+      console.log("🪙 Mint işlemi başlatılıyor...");
+
+      // 1️⃣ Farcaster MiniApp içindeysek SDK Provider’ı kullan
+      const fcProvider = await sdk.wallet.getEthereumProvider();
+
+      if (fcProvider) {
+        const ethersProvider = new ethers.BrowserProvider(fcProvider);
+        const signer = await ethersProvider.getSigner();
+        const contract = new ethers.Contract(CONTRACT_ADDRESS, ABI, signer);
+        const tx = await contract.mintScore(score);
+        await tx.wait();
+        console.log("✅ Farcaster Wallet mint tamamlandı!");
+        setTxHash(tx.hash);
+        return;
+      }
+
+      // 2️⃣ Normal cüzdan (wagmi)
+      if (isConnected) {
+        const tx = await writeContractAsync({
+          address: CONTRACT_ADDRESS,
+          abi: ABI,
+          functionName: "mintScore",
+          args: [score],
+          chainId: base.id,
+        });
+        console.log("✅ Wagmi mint tamamlandı!");
+        setTxHash(tx);
+        return;
+      }
+
       setErrorMsg("Cüzdan bağlı değil 😕");
-      return;
+    } catch (err) {
+      console.error("Mint hatası:", err);
+      setErrorMsg("Mint işlemi başarısız oldu 😅");
     }
-
-    if (score <= 0) {
-      setErrorMsg("Henüz skorun yok 😅");
-      return;
-    }
-
-    console.log("🪙 Mint işlemi başlatılıyor...");
-
-    await writeContract({
-      address: "0x0DD40377cC1841b3e1aE695B015Cd82883b35390",
-      abi: [
-        {
-          inputs: [{ internalType: "uint256", name: "score", type: "uint256" }],
-          name: "mintScore",
-          outputs: [{ internalType: "uint256", name: "", type: "uint256" }],
-          stateMutability: "nonpayable",
-          type: "function",
-        },
-      ],
-      functionName: "mintScore",
-      args: [score],
-      chainId: base.id,
-    });
-
-    console.log("✅ Mint işlemi gönderildi!");
-  } catch (err) {
-    console.error("Mint hatası:", err);
-    setErrorMsg("Mint işlemi başarısız oldu 😅");
-  }
-};
-
-
+  };
 
   return (
     <div className="flex flex-col items-center justify-center min-h-screen px-3 bg-gradient-to-b from-indigo-900 via-purple-900 to-slate-900 text-white">
@@ -213,7 +204,6 @@ const handleMint = async () => {
         Skor: <span className="text-yellow-400 font-semibold">{score}</span>
       </p>
 
-      {/* 🎮 Oyun Alanı */}
       <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-3 sm:gap-4 bg-black/40 p-4 sm:p-6 md:p-8 rounded-2xl shadow-2xl border border-white/10 w-full max-w-md mx-auto">
         {targets.map((box) => (
           <motion.div
@@ -226,7 +216,7 @@ const handleMint = async () => {
                 : box.active
                 ? "#f59e0b"
                 : "#374151",
-              boxShadow: box.active ? "0 0 22px #fbbf24" : "0 0 0px transparent",
+              boxShadow: box.active ? "0 0 22px #fbbf24" : "0 0 0 transparent",
             }}
             transition={{ duration: 0.2 }}
             className="w-20 h-20 rounded-xl cursor-pointer"
@@ -234,7 +224,6 @@ const handleMint = async () => {
         ))}
       </div>
 
-      {/* 🏁 Oyun Sonu */}
       {gameOver && (
         <div className="mt-6 flex flex-col items-center gap-4">
           <span className="text-lg font-semibold">
@@ -250,14 +239,9 @@ const handleMint = async () => {
             </button>
             <button
               onClick={handleMint}
-              disabled={isPending}
-              className={`flex-1 px-4 py-2 rounded-lg ${
-                isPending
-                  ? "bg-gray-500 cursor-not-allowed"
-                  : "bg-emerald-600 hover:bg-emerald-500"
-              } transition`}
+              className="flex-1 px-4 py-2 rounded-lg bg-emerald-600 hover:bg-emerald-500 transition"
             >
-              {isPending ? "⏳ Minting..." : "🪙 Mint Score"}
+              🪙 Mint Score
             </button>
           </div>
 
@@ -283,12 +267,6 @@ const handleMint = async () => {
             <p className="text-red-400 text-sm mt-2 font-medium">{errorMsg}</p>
           )}
         </div>
-      )}
-
-      {!gameOver && (
-        <p className="mt-6 text-sm text-gray-300 text-center">
-          🔥 20 deneme hakkın var. Vuramazsan da hak gider.
-        </p>
       )}
     </div>
   );
