@@ -1,11 +1,12 @@
-import { useState, useEffect } from 'react'
-import './App.css'
+import { useEffect } from "react";
+import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { sdk } from "@farcaster/miniapp-sdk";
-import StartGame from './components/StartGame'
-import Shooting from './components/Shooting'
+import StartGame from "./components/StartGame";
+import Shooting from "./components/Shooting";
+import SharePage from "./components/SharePage";
+import './App.css'
 function App() {
-  const [isGameStarted, setIsGameStarted] = useState(false)
-    useEffect(() => {
+  useEffect(() => {
     const init = async () => {
       try {
         await sdk.actions.ready(); // ✅ Farcaster'a "hazırım" sinyali gönderir
@@ -14,15 +15,18 @@ function App() {
         console.error("SDK ready hatası:", err);
       }
     };
-
     init();
   }, []);
+
   return (
-    <>
-      {!isGameStarted && <StartGame  setIsGameStarted={setIsGameStarted}/>}
-      {isGameStarted && <Shooting/>}
-    </>
-  )
+    <BrowserRouter>
+      <Routes>
+        <Route path="/" element={<StartGame />} />
+        <Route path="/game" element={<Shooting />} />
+        <Route path="/share" element={<SharePage />} />
+      </Routes>
+    </BrowserRouter>
+  );
 }
 
-export default App
+export default App;

@@ -1,7 +1,9 @@
 import React from "react";
 import { motion } from "framer-motion";
-
-const StartGame = ({ setIsGameStarted }) => {
+import { useNavigate } from "react-router-dom";
+const StartGame = ({ }) => {
+  const navigate = useNavigate();
+  const handleStart = () => navigate("/game");
   return (
     <div className="flex flex-col items-center justify-center h-screen bg-gradient-to-br from-indigo-900 via-purple-900 to-slate-900 text-white">
       {/* Başlık */}
@@ -29,7 +31,7 @@ const StartGame = ({ setIsGameStarted }) => {
       <motion.button
         whileHover={{ scale: 1.1 }}
         whileTap={{ scale: 0.95 }}
-        onClick={() => setIsGameStarted(true)}
+        onClick={handleStart }
         className="px-10 py-4 bg-indigo-600 hover:bg-indigo-500 rounded-2xl text-2xl font-semibold shadow-lg shadow-indigo-500/30 transition-all"
       >
         🚀 Başla
