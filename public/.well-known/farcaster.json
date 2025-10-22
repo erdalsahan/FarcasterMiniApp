@@ -11,7 +11,7 @@
     "version": "1",
     "name": "Airdrop Hunter",
     "description": "Get and Cast Your Haunt Score",
-    "iconUrl": "https://airdrop-predictor.vercel.app/Logo.png",
+    "iconUrl": "https://farcaster-mini-app-kappa.vercel.app/Logo.png",
     "homeUrl": "https://farcaster-mini-app-kappa.vercel.app/",
     "canonicalDomain": "farcaster-mini-app-kappa.vercel.app",
     "requiredChains": ["eip155:8453"], 
