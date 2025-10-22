@@ -11,7 +11,9 @@ const ACTIVE_LIFETIME_MS = 600;
 const CONTRACT_ADDRESS = "0x0DD40377cC1841b3e1aE695B015Cd82883b35390";
 const ABI = [
   {
-    inputs: [{ internalType: "uint256", name: "score", type: "uint256" }],
+    inputs: [
+      { internalType: "uint256", name: "score", type: "uint256" }
+    ],
     name: "mintScore",
     outputs: [{ internalType: "uint256", name: "", type: "uint256" }],
     stateMutability: "nonpayable",
@@ -149,31 +151,36 @@ export default function Shooting() {
     }
   };
 
-  // 🪙 Sadece Farcaster Wallet ile mint işlemi
-  const handleMint = async () => {
-    try {
-      console.log("🪙 Mint işlemi başlatılıyor (Farcaster Wallet)...");
-
-      const provider = await sdk.wallet.getEthereumProvider();
-      if (!provider) {
-        setErrorMsg("⚠️ Farcaster Wallet bulunamadı 😕");
-        return;
-      }
-
-      const ethersProvider = new ethers.BrowserProvider(provider);
-      const signer = await ethersProvider.getSigner();
-      const contract = new ethers.Contract(CONTRACT_ADDRESS, ABI, signer);
-
-      const tx = await contract.mintScore(score);
-      await tx.wait();
-
-      console.log("✅ Mint başarılı! Tx:", tx.hash);
-      setTxHash(tx.hash);
-    } catch (err) {
-      console.error("Mint hatası:", err);
-      setErrorMsg("Mint işlemi başarısız oldu 😅");
+ // 🪙 MINT SCORE — wagmi üzerinden
+const handleMint = async () => {
+  try {
+    if (!isConnected) {
+      setErrorMsg("Cüzdan bağlı değil 😕");
+      return;
     }
-  };
+
+    if (score <= 0) {
+      setErrorMsg("Henüz skorun yok 😅");
+      return;
+    }
+
+    console.log("🪙 Mint işlemi başlatılıyor...");
+
+    await writeContract({
+      address: CONTRACT_ADDRESS,
+      abi: ABI,
+      functionName: "mintScore",
+      args: [score],
+      chainId: base.id,
+    });
+
+    console.log("✅ Mint işlemi gönderildi!");
+  } catch (err) {
+    console.error("Mint hatası:", err);
+    setErrorMsg("Mint işlemi başarısız oldu 😅");
+  }
+};
+
 
   return (
     <div className="flex flex-col items-center justify-center min-h-screen px-3 bg-gradient-to-b from-indigo-900 via-purple-900 to-slate-900 text-white">
