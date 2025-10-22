@@ -150,14 +150,58 @@ Benim skorumu geçebilir misin? 🎯`;
 
 
   // 🪙 MINT SCORE
-  const handleMint = async () => {
-    try {
-      await sdk.actions.openUrl("https://mint.fun/");
-    } catch (err) {
-      console.error("Mint hatası:", err);
-      alert("Mint işlemi başarısız oldu 😅");
+ import { ethers } from "ethers";
+
+const handleMint = async () => {
+  try {
+    console.log("🪙 Mint işlemi başlatılıyor...");
+
+    // ✅ Öncelikli: Farcaster Wallet Provider
+    let provider;
+    if (window.ethereum?.providers?.length) {
+      provider =
+        window.ethereum.providers.find(
+          (p) => p.isFarcaster || p.name?.toLowerCase().includes("farcaster")
+        ) || window.ethereum.providers[0];
+    } else {
+      provider = await sdk.wallet.getEthereumProvider();
     }
-  };
+
+    if (!provider) {
+      console.error("⚠️ Cüzdan bulunamadı!");
+      setErrorMsg("Cüzdan bulunamadı 😕");
+      return;
+    }
+
+    const ethersProvider = new ethers.providers.Web3Provider(provider);
+    const signer = ethersProvider.getSigner();
+    const userAddress = await signer.getAddress();
+
+    console.log("✅ Kullanıcı adresi:", userAddress);
+
+    // 🎯 Senin kontrat adresin
+    const contractAddress = "0x473b72Ce35e3d5D6646EE9C733AC1F7Ce4250FA4";
+
+    // 🧱 Mint fonksiyonu
+    const abi = [
+      "function mintScore(address to, uint256 score) external returns (uint256)",
+    ];
+
+    const contract = new ethers.Contract(contractAddress, abi, signer);
+
+    console.log("🧩 Mint işlemi gönderiliyor...");
+    const tx = await contract.mintScore(userAddress, score);
+    await tx.wait();
+
+    console.log("✅ Mint başarıyla tamamlandı! Tx:", tx.hash);
+
+    setErrorMsg(`Mint başarılı! 🎉 Tx: ${tx.hash}`);
+  } catch (err) {
+    console.error("Mint hatası:", err);
+    setErrorMsg("Mint işlemi başarısız oldu 😅");
+  }
+};
+
 
   return (
     <div className="flex flex-col items-center justify-center min-h-screen px-3 bg-gradient-to-b from-indigo-900 via-purple-900 to-slate-900 text-white">
