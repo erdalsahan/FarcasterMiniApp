@@ -154,10 +154,10 @@ export default function Shooting() {
  // 🪙 MINT SCORE — wagmi üzerinden
 const handleMint = async () => {
   try {
-    if (!isConnected) {
-      setErrorMsg("Cüzdan bağlı değil 😕");
-      return;
-    }
+    // if (!isConnected) {
+    //   setErrorMsg("Cüzdan bağlı değil 😕");
+    //   return;
+    // }
 
     if (score <= 0) {
       setErrorMsg("Henüz skorun yok 😅");
