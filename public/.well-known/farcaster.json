@@ -1,0 +1,24 @@
+{
+  "accountAssociation": {
+    "header": "eyJmaWQiOjEzNDIyNzksInR5cGUiOiJjdXN0b2R5Iiwia2V5IjoiMHg4MTNCNzM4YzljNzNBNUNBMzViODAzNTgyMDg2QjI2NjM1OEY5OWI5In0",
+    "payload": "eyJkb21haW4iOiJhaXJkcm9wLXByZWRpY3Rvci52ZXJjZWwuYXBwIn0",
+    "signature": "MHhhZWRhNmYzZjdjYzUyYTJkNTE0NTQ1YjIyMzY2MTUyNDE1YWM5NWFmNTNlY2NmYjI3NGQ2ZjNjMmY4NmQ0NTQzNTZlZTBiYTg2MjMzNmJkYmI0NTgzYmIyMGE3NWZlZmI5ZTMyMjA5MmYyNDYyOTU3ZWU4MzJkYjI2OGE0MTFkMTFi"
+  },
+  
+  "miniapp": {
+    "version": "1",
+    "name": "Airdrop Hunter",
+    "description": "Get and Cast Your Haunt Score",
+    "iconUrl": "https://airdrop-predictor.vercel.app/Logo.png",
+    "homeUrl": "https://farcaster-mini-app-kappa.vercel.app/",
+    "canonicalDomain": "farcaster-mini-app-kappa.vercel.app",
+    "requiredChains": ["eip155:8453"], 
+    "tags": ["miniapp", "airdrop", "game", "mint"],
+    "requiredCapabilities": [
+      "actions.ready"
+    ]
+  },
+   "baseBuilder": {
+    "allowedAddresses": ["0xD684D39F1a486635D123d0a09C125970cFa33518"]
+  }
+}
