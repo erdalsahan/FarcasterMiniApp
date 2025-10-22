@@ -125,21 +125,15 @@ const handleCast = async () => {
   const text = `💥 Airdrop Hunter'da ${score} puan yaptım! 🚀
 Benim skorumu geçebilir misin? 🎯`;
 
-  const imageUrl = "https://farcaster-mini-app-kappa.vercel.app/Logo.png";
   const appUrl = "https://farcaster-mini-app-kappa.vercel.app/";
 
   try {
-    // 🔗 Warpcast composer bağlantısı: text + görsel + oyun linki
-    const warpcastUrl = `https://warpcast.com/~/compose?text=${encodeURIComponent(
-      text
-    )}&embeds[]=${encodeURIComponent(imageUrl)}&embeds[]=${encodeURIComponent(appUrl)}`;
+    const warpcastUrl = `https://warpcast.com/~/compose?text=${encodeURIComponent(text)}&embeds[]=${encodeURIComponent(appUrl)}`;
 
-    // Farcaster içindeyse SDK ile aç
     if (sdk?.actions?.openUrl) {
       await sdk.actions.openUrl({ url: warpcastUrl });
       console.log("✅ Cast composer açıldı (SDK ile)");
     } else {
-      // Browser fallback
       window.open(warpcastUrl, "_blank");
       console.log("🌐 Tarayıcı composer açıldı (fallback)");
     }
