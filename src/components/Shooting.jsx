@@ -10,12 +10,11 @@ const ACTIVATE_EVERY_MS = 700;
 const ACTIVE_LIFETIME_MS = 600;
 
 // 🎯 Kontrat bilgileri
-const CONTRACT_ADDRESS = "0x473b72Ce35e3d5D6646EE9C733AC1F7Ce4250FA4";
+const CONTRACT_ADDRESS = "0x0DD40377cC1841b3e1aE695B015Cd82883b35390";
 const ABI = [
   {
     inputs: [
-      { internalType: "address", name: "to", type: "address" },
-      { internalType: "uint256", name: "score", type: "uint256" },
+      { internalType: "uint256", name: "score", type: "uint256" }
     ],
     name: "mintScore",
     outputs: [{ internalType: "uint256", name: "", type: "uint256" }],
@@ -23,6 +22,7 @@ const ABI = [
     type: "function",
   },
 ];
+
 
 export default function Shooting() {
   const [targets, setTargets] = useState([]);
@@ -167,29 +167,35 @@ Benim skorumu geçebilir misin? 🎯`;
   };
 
   // 🪙 MINT SCORE — wagmi üzerinden
-  const handleMint = async () => {
-    try {
-      if (!isConnected) {
-        setErrorMsg("Cüzdan bağlı değil 😕");
-        return;
-      }
-
-      console.log("🪙 Mint işlemi başlatılıyor...");
-
-      await writeContract({
-        address: CONTRACT_ADDRESS,
-        abi: ABI,
-        functionName: "mintScore",
-        args: [address, score],
-        chainId: base.id,
-      });
-
-      console.log("✅ Mint işlemi gönderildi!");
-    } catch (err) {
-      console.error("Mint hatası:", err);
-      setErrorMsg("Mint işlemi başarısız oldu 😅");
+const handleMint = async () => {
+  try {
+    if (!isConnected) {
+      setErrorMsg("Cüzdan bağlı değil 😕");
+      return;
     }
-  };
+
+    if (score <= 0) {
+      setErrorMsg("Henüz skorun yok 😅");
+      return;
+    }
+
+    console.log("🪙 Mint işlemi başlatılıyor...");
+
+    await writeContract({
+      address: CONTRACT_ADDRESS,
+      abi: ABI,
+      functionName: "mintScore",
+      args: [score],
+      chainId: base.id,
+    });
+
+    console.log("✅ Mint işlemi gönderildi!");
+  } catch (err) {
+    console.error("Mint hatası:", err);
+    setErrorMsg("Mint işlemi başarısız oldu 😅");
+  }
+};
+
 
   return (
     <div className="flex flex-col items-center justify-center min-h-screen px-3 bg-gradient-to-b from-indigo-900 via-purple-900 to-slate-900 text-white">
