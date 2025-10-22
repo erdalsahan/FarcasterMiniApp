@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from "react";
 import { motion } from "framer-motion";
-import { sdk } from "@farcaster/miniapp-sdk"; // ✅ Farcaster SDK
+import { sdk } from "@farcaster/miniapp-sdk";
 
 const TOTAL_BOXES = 20;
 const MAX_HITS = 20;
@@ -17,6 +17,19 @@ export default function Shooting() {
 
   const intervalRef = useRef(null);
   const timeoutRef = useRef(null);
+
+  // ✅ Farcaster SDK ready (splash ekran hatası çözümü)
+  useEffect(() => {
+    const init = async () => {
+      try {
+        await sdk.actions.ready();
+        console.log("✅ Farcaster MiniApp ready!");
+      } catch (err) {
+        console.error("SDK ready hatası:", err);
+      }
+    };
+    init();
+  }, []);
 
   // Oyunu sıfırla
   const resetGame = () => {
@@ -111,7 +124,7 @@ export default function Shooting() {
   const handleCast = async () => {
     try {
       await sdk.actions.openCastComposer({
-        text: `Ben ${score} puan yaptım 💥 Farcaster Mini Game'de! #AirdropAvcısı`,
+        text: `🎯 Airdrop Hunter'da ${score} puan yaptım! 💥 #FarcasterMiniGame`,
       });
     } catch (err) {
       console.error("Cast hatası:", err);
@@ -119,11 +132,10 @@ export default function Shooting() {
     }
   };
 
-  // 🪙 MINT SCORE (örnek)
+  // 🪙 MINT SCORE
   const handleMint = async () => {
     try {
-      // burada gerçek kontrat işlemini ekleyebilirsin
-      await sdk.actions.openUrl("https://mint.fun/"); // örnek
+      await sdk.actions.openUrl("https://mint.fun/");
     } catch (err) {
       console.error("Mint hatası:", err);
       alert("Mint işlemi başarısız oldu 😅");
@@ -131,8 +143,8 @@ export default function Shooting() {
   };
 
   return (
-    <div className="min-h-screen flex flex-col items-center pt-10 pb-14 bg-gradient-to-b from-indigo-900 via-purple-900 to-slate-900 text-white">
-      <h1 className="text-4xl font-extrabold mb-2">💥 Airdrop Avcısı</h1>
+    <div className="flex flex-col items-center justify-center min-h-screen px-3 bg-gradient-to-b from-indigo-900 via-purple-900 to-slate-900 text-white">
+      <h1 className="text-3xl font-extrabold mb-2">💥 Airdrop Hunter</h1>
       <p className="text-lg mb-2">
         Skor: <span className="text-yellow-400 font-semibold">{score}</span>
       </p>
@@ -140,8 +152,8 @@ export default function Shooting() {
         🎯 Kalan Hak: {MAX_HITS - tries}
       </p>
 
-      {/* Oyun Alanı */}
-      <div className="grid grid-cols-5 gap-5 bg-black/40 p-8 rounded-2xl shadow-2xl border border-white/10">
+      {/* 🎮 Oyun Alanı */}
+      <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-3 sm:gap-4 bg-black/40 p-4 sm:p-6 md:p-8 rounded-2xl shadow-2xl border border-white/10 w-full max-w-md mx-auto">
         {targets.map((box) => (
           <motion.div
             key={box.id}
@@ -161,23 +173,23 @@ export default function Shooting() {
         ))}
       </div>
 
-      {/* Oyun Sonu */}
+      {/* 🏁 Oyun Sonu */}
       {gameOver && (
         <div className="mt-6 flex flex-col items-center gap-4">
           <span className="text-lg font-semibold">
             🎮 Oyun bitti! Skorun: {score}
           </span>
 
-          <div className="flex gap-4">
+          <div className="flex flex-col sm:flex-row gap-3 w-full max-w-xs">
             <button
               onClick={handleCast}
-              className="px-4 py-2 rounded-lg bg-purple-600 hover:bg-purple-500 transition"
+              className="flex-1 px-4 py-2 rounded-lg bg-purple-600 hover:bg-purple-500 transition"
             >
               🟣 Cast Your Score
             </button>
             <button
               onClick={handleMint}
-              className="px-4 py-2 rounded-lg bg-emerald-600 hover:bg-emerald-500 transition"
+              className="flex-1 px-4 py-2 rounded-lg bg-emerald-600 hover:bg-emerald-500 transition"
             >
               🪙 Mint Score
             </button>
@@ -193,7 +205,7 @@ export default function Shooting() {
       )}
 
       {!gameOver && (
-        <p className="mt-6 text-sm text-gray-300">
+        <p className="mt-6 text-sm text-gray-300 text-center">
           🔥 20 deneme hakkın var. Vuramazsan da hak gider.
         </p>
       )}
