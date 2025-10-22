@@ -148,9 +148,9 @@ export default function Shooting() {
       <p className="text-lg mb-2">
         Skor: <span className="text-yellow-400 font-semibold">{score}</span>
       </p>
-      <p className="text-sm text-gray-300 mb-6">
+      {/* <p className="text-sm text-gray-300 mb-6">
         🎯 Kalan Hak: {MAX_HITS - tries}
-      </p>
+      </p> */}
 
       {/* 🎮 Oyun Alanı */}
       <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-3 sm:gap-4 bg-black/40 p-4 sm:p-6 md:p-8 rounded-2xl shadow-2xl border border-white/10 w-full max-w-md mx-auto">
