@@ -1,26 +1,26 @@
 {
-  
   "accountAssociation": {
     "header": "eyJmaWQiOjEzNDIyNzksInR5cGUiOiJhdXRoIiwia2V5IjoiMHhkNDAxNzAwZjU2YzFGOWY2Q0Y1RjMwNTAwNmQ5RmE1ODM5M2E3NzZhIn0",
     "payload": "eyJkb21haW4iOiJmYXJjYXN0ZXItbWluaS1hcHAta2FwcGEudmVyY2VsLmFwcCJ9",
     "signature": "V5xkX4Xu0ibt6eEGUXkrvirl2nTZbhrakQdyf6l8YxsP64StwYxPHisYhzS6aT0shmeEDU/G9bNL5Dwcd00aaxs="
   },
 
-  
   "miniapp": {
     "version": "1",
     "name": "Airdrop Hunter",
-    "description": "Get and Cast Your Haunt Score",
+    "description": "Get and Cast Your Hunt Score 🎯",
     "iconUrl": "https://farcaster-mini-app-kappa.vercel.app/Logo.png",
     "homeUrl": "https://farcaster-mini-app-kappa.vercel.app/",
     "canonicalDomain": "farcaster-mini-app-kappa.vercel.app",
-    "requiredChains": ["eip155:8453"], 
+    "requiredChains": ["eip155:8453"],
     "tags": ["miniapp", "airdrop", "game", "mint"],
     "requiredCapabilities": [
       "actions.ready"
-    ]
+    ],
+    "castShareUrl": "https://farcaster-mini-app-kappa.vercel.app/share"
   },
-   "baseBuilder": {
+
+  "baseBuilder": {
     "allowedAddresses": ["0xD684D39F1a486635D123d0a09C125970cFa33518"]
   }
 }
