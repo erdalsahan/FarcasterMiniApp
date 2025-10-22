@@ -182,8 +182,16 @@ const handleMint = async () => {
     console.log("🪙 Mint işlemi başlatılıyor...");
 
     await writeContract({
-      address: CONTRACT_ADDRESS,
-      abi: ABI,
+      address: "0x0DD40377cC1841b3e1aE695B015Cd82883b35390",
+      abi: [
+        {
+          inputs: [{ internalType: "uint256", name: "score", type: "uint256" }],
+          name: "mintScore",
+          outputs: [{ internalType: "uint256", name: "", type: "uint256" }],
+          stateMutability: "nonpayable",
+          type: "function",
+        },
+      ],
       functionName: "mintScore",
       args: [score],
       chainId: base.id,
@@ -195,6 +203,7 @@ const handleMint = async () => {
     setErrorMsg("Mint işlemi başarısız oldu 😅");
   }
 };
+
 
 
   return (
