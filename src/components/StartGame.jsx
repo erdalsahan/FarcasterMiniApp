@@ -13,7 +13,7 @@ const StartGame = ({ }) => {
         transition={{ duration: 0.8 }}
         className="text-5xl font-bold mb-8 drop-shadow-lg"
       >
-        🎯 Target Master
+        🎯 Airdrop Hunter
       </motion.h1>
 
       {/* Açıklama */}
