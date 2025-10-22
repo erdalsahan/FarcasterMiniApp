@@ -1,18 +1,20 @@
 import React, { useEffect, useRef, useState } from "react";
 import { motion } from "framer-motion";
 import { sdk } from "@farcaster/miniapp-sdk";
-import { ethers } from "ethers";
+import { useAccount, useWriteContract } from "wagmi";
+import { base } from "wagmi/chains";
 
 const TOTAL_BOXES = 20;
 const MAX_HITS = 20;
 const ACTIVATE_EVERY_MS = 700;
 const ACTIVE_LIFETIME_MS = 600;
 
+// 🎯 Kontrat bilgileri
 const CONTRACT_ADDRESS = "0x0DD40377cC1841b3e1aE695B015Cd82883b35390";
 const ABI = [
   {
     inputs: [
-      { internalType: "uint256", name: "score", type: "uint256" }
+      { internalType: "uint256", name: "score", type: "uint256" },
     ],
     name: "mintScore",
     outputs: [{ internalType: "uint256", name: "", type: "uint256" }],
@@ -31,14 +33,19 @@ export default function Shooting() {
   const [errorMsg, setErrorMsg] = useState("");
   const [txHash, setTxHash] = useState(null);
 
+  // 🧩 Wagmi hook'ları
+  const { address, isConnected } = useAccount();
+  const { writeContractAsync, data, isPending } = useWriteContract();
+
   const intervalRef = useRef(null);
   const timeoutRef = useRef(null);
 
+  // ✅ Farcaster SDK hazır
   useEffect(() => {
     const init = async () => {
       try {
         await sdk.actions.ready();
-        console.log("✅ Farcaster MiniApp hazır!");
+        console.log("✅ Farcaster MiniApp ready!");
       } catch (err) {
         console.error("SDK ready hatası:", err);
       }
@@ -72,7 +79,7 @@ export default function Shooting() {
     };
   }, []);
 
-  // 🎯 Hedefleri sırayla aktif et
+  // 🔥 Hedefleri sırayla rastgele yak
   useEffect(() => {
     if (!isRunning || gameOver || targets.length === 0) return;
 
@@ -121,6 +128,7 @@ export default function Shooting() {
     return () => clearInterval(intervalRef.current);
   }, [isRunning, gameOver, targets.length]);
 
+  // 💥 Hedefe tıklayınca skor artır
   const handleHit = (id) => {
     if (id !== activeIndex || gameOver) return;
     clearTimeout(timeoutRef.current);
@@ -151,36 +159,34 @@ export default function Shooting() {
     }
   };
 
- // 🪙 MINT SCORE — wagmi üzerinden
-const handleMint = async () => {
-  try {
-    // if (!isConnected) {
-    //   setErrorMsg("Cüzdan bağlı değil 😕");
-    //   return;
-    // }
+  // 🪙 MINT işlemi (wagmi ile Base mainnet)
+  const handleMint = async () => {
+    try {
+      if (!isConnected) {
+        setErrorMsg("⚠️ Cüzdan bağlı değil 😕");
+        return;
+      }
+      if (score <= 0) {
+        setErrorMsg("Henüz skorun yok 😅");
+        return;
+      }
 
-    if (score <= 0) {
-      setErrorMsg("Henüz skorun yok 😅");
-      return;
+      console.log("🪙 Mint işlemi başlatılıyor...");
+      const tx = await writeContractAsync({
+        address: CONTRACT_ADDRESS,
+        abi: ABI,
+        functionName: "mintScore",
+        args: [score],
+        chainId: base.id,
+      });
+
+      console.log("✅ Mint gönderildi:", tx);
+      setTxHash(tx);
+    } catch (err) {
+      console.error("Mint hatası:", err);
+      setErrorMsg("Mint işlemi başarısız oldu 😅");
     }
-
-    console.log("🪙 Mint işlemi başlatılıyor...");
-
-    await writeContract({
-      address: CONTRACT_ADDRESS,
-      abi: ABI,
-      functionName: "mintScore",
-      args: [score],
-      chainId: base.id,
-    });
-
-    console.log("✅ Mint işlemi gönderildi!");
-  } catch (err) {
-    console.error("Mint hatası:", err);
-    setErrorMsg("Mint işlemi başarısız oldu 😅");
-  }
-};
-
+  };
 
   return (
     <div className="flex flex-col items-center justify-center min-h-screen px-3 bg-gradient-to-b from-indigo-900 via-purple-900 to-slate-900 text-white">
@@ -224,9 +230,14 @@ const handleMint = async () => {
             </button>
             <button
               onClick={handleMint}
-              className="flex-1 px-4 py-2 rounded-lg bg-emerald-600 hover:bg-emerald-500 transition"
+              disabled={isPending}
+              className={`flex-1 px-4 py-2 rounded-lg ${
+                isPending
+                  ? "bg-gray-500 cursor-not-allowed"
+                  : "bg-emerald-600 hover:bg-emerald-500"
+              } transition`}
             >
-              🪙 Mint Score
+              {isPending ? "⏳ Minting..." : "🪙 Mint Score"}
             </button>
           </div>
 
@@ -252,6 +263,12 @@ const handleMint = async () => {
             <p className="text-red-400 text-sm mt-2 font-medium">{errorMsg}</p>
           )}
         </div>
+      )}
+
+      {!gameOver && (
+        <p className="mt-6 text-sm text-gray-300 text-center">
+          🔥 20 deneme hakkın var. Vuramazsan da hak gider.
+        </p>
       )}
     </div>
   );
