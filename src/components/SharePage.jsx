@@ -124,6 +124,7 @@ export default function Shooting() {
 
   // 🎯 CAST YOUR SCORE
   const handleCast = async () => {
+    console.log("SDK Actions:", sdk.actions);
     try {
       await sdk.actions.openUrl({
         url: `https://warpcast.com/~/compose?text=🎯 Airdrop Hunter'da ${score} puan yaptım! 💥 #FarcasterMiniGame`
