@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from "react";
 import { motion } from "framer-motion";
 import { sdk } from "@farcaster/miniapp-sdk";
-
+import { ethers } from "ethers";
 const TOTAL_BOXES = 20;
 const MAX_HITS = 20;
 const ACTIVATE_EVERY_MS = 700;
@@ -150,8 +150,6 @@ Benim skorumu geçebilir misin? 🎯`;
 
 
   // 🪙 MINT SCORE
- import { ethers } from "ethers";
-
 const handleMint = async () => {
   try {
     console.log("🪙 Mint işlemi başlatılıyor...");
