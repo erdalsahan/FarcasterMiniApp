@@ -26,17 +26,18 @@ function App() {
   }, []);
 
   return (
-    <WagmiProvider config={config}>
-      <QueryClientProvider client={queryClient}>
-        <BrowserRouter>
-          <Routes>
-            <Route path="/" element={<StartGame />} />
-            <Route path="/game" element={<Shooting />} />
-            <Route path="/share" element={<SharePage />} />
-          </Routes>
-        </BrowserRouter>
-      </QueryClientProvider>
-    </WagmiProvider>
+   <QueryClientProvider client={queryClient}>
+  <WagmiProvider config={config}>
+    <BrowserRouter>
+      <Routes>
+        <Route path="/" element={<StartGame />} />
+        <Route path="/game" element={<Shooting />} />
+        <Route path="/share" element={<SharePage />} />
+      </Routes>
+    </BrowserRouter>
+  </WagmiProvider>
+</QueryClientProvider>
+
   );
 }
 
