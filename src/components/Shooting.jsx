@@ -234,7 +234,7 @@ export default function Shooting() {
               onClick={handleCast}
               className="flex-1 px-4 py-2 rounded-lg bg-purple-600 hover:bg-purple-500 transition"
             >
-              🟣 Cast Your Score
+              🟣 Share Your Score
             </button>
             <button
               onClick={handleMint}
